@@ -32,7 +32,6 @@ export default function App() {
     setLotteryData(null);
 
     try {
-      // fetchLotteryData is now resilient and returns sample data on failure.
       const data = await fetchLotteryData(selectedLottery);
       
       let phrase: string;
@@ -48,7 +47,6 @@ export default function App() {
       setLuckyPhrase(phrase);
 
       if (data.isSampleData) {
-        // Append to warning if one already exists from phrase generation
         setWarning(prev => {
             const dataWarning = 'Atenção: Não foi possível buscar o resultado mais recente. Estamos exibindo um exemplo.';
             return prev ? `${dataWarning} ${prev}` : dataWarning;
@@ -56,7 +54,6 @@ export default function App() {
       }
 
     } catch (err) {
-      // This catch is now for truly unexpected errors, as the two main async calls are handled internally.
       console.error(err);
       const errorMessage = 'Ocorreu um erro inesperado. Tente novamente.';
       setError(errorMessage);
@@ -86,126 +83,110 @@ export default function App() {
         setError('Não foi possível gerar a imagem. Tente novamente.');
         setIsDownloading(false);
       });
-  }, [lotteryData, selectedLottery]);
+  }, [canvasRef, lotteryData, selectedLottery]);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+    <div className="min-h-screen bg-slate-100 font-sans">
       <Header />
       <main className="container mx-auto p-4 md:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Controls Column */}
-          <div className="lg:col-span-4 space-y-8">
-            <div className="bg-white p-6 rounded-2xl shadow-lg">
-              <h2 className="text-xl font-bold text-slate-700 mb-1 flex items-center">
-                <span className="bg-brand-primary text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 font-bold text-lg">1</span>
-                Escolha a Loteria
-              </h2>
-              <p className="text-slate-500 mb-4 ml-11">Selecione para qual loteria deseja gerar o post.</p>
-              <LotterySelector selected={selectedLottery} onSelect={(l) => {
-                setSelectedLottery(l);
-                setLotteryData(null); // Reset preview when lottery changes
-                setWarning(null);
-              }} />
+          <div className="lg:col-span-1 bg-white p-6 rounded-2xl shadow-lg h-fit space-y-8">
+            <div>
+              <h2 className="text-xl font-bold text-slate-700 mb-4">1. Escolha a Loteria</h2>
+              <LotterySelector selected={selectedLottery} onSelect={setSelectedLottery} />
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg">
-              <h2 className="text-xl font-bold text-slate-700 mb-1 flex items-center">
-                <span className="bg-brand-primary text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 font-bold text-lg">2</span>
-                Escolha o Template
-              </h2>
-              <p className="text-slate-500 mb-4 ml-11">Selecione o visual do seu post.</p>
-              <TemplateSelector templates={AVAILABLE_TEMPLATES} selected={selectedTemplate} onSelect={setSelectedTemplate} />
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-lg">
-              <h2 className="text-xl font-bold text-slate-700 mb-1 flex items-center">
-                <span className="bg-brand-primary text-white w-8 h-8 rounded-full flex items-center justify-center mr-3 font-bold text-lg">3</span>
-                Gere o Post
-              </h2>
-              <p className="text-slate-500 mb-4 ml-11">Tudo pronto? Clique para gerar a imagem.</p>
+            <div className="w-full">
               <button
                 onClick={handleGenerate}
                 disabled={isLoading || !selectedLottery}
-                className="w-full flex items-center justify-center gap-2 bg-brand-secondary hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 disabled:bg-slate-400 disabled:cursor-not-allowed transform hover:scale-105"
+                className="w-full flex items-center justify-center gap-3 bg-brand-primary text-white font-bold py-4 px-4 rounded-xl hover:bg-blue-800 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:bg-slate-400 disabled:scale-100 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <>
-                    <Loader className="animate-spin" size={20} />
+                    <Loader className="animate-spin" size={24} />
                     Gerando...
                   </>
                 ) : (
                   <>
-                    <Zap size={20} />
-                    Gerar Post
+                    <Zap size={24} />
+                    Gerar Post do Resultado
                   </>
                 )}
               </button>
             </div>
+
+            <div>
+              <h2 className="text-xl font-bold text-slate-700 mb-4">2. Selecione o Template</h2>
+              <TemplateSelector templates={AVAILABLE_TEMPLATES} selected={selectedTemplate} onSelect={setSelectedTemplate} />
+            </div>
           </div>
 
-          {/* Canvas Preview Column */}
-          <div className="lg:col-span-8">
-            <div className="sticky top-8">
-              <h2 className="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <ImageIcon className="text-brand-primary" /> Pré-visualização
-              </h2>
-              <div className="aspect-[3/4] bg-white rounded-2xl shadow-lg p-4 flex items-center justify-center overflow-hidden">
-                {isLoading ? (
-                    <div className="flex flex-col items-center gap-4 text-slate-500">
-                        <Loader className="animate-spin" size={48} />
-                        <p className="font-medium">Buscando resultado mais recente...</p>
-                    </div>
-                ) : lotteryData ? (
-                    <div className="w-full">
-                        <CanvasPreview ref={canvasRef} template={selectedTemplate} data={lotteryData} luckyPhrase={luckyPhrase} />
-                        
-                        <div className="space-y-4 mt-4">
-                          {warning && (
-                              <div className="p-3 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg" role="alert">
-                                  <div className="flex">
-                                      <div className="flex-shrink-0">
-                                          <AlertTriangle className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                                      </div>
-                                      <div className="ml-3">
-                                          <p className="text-sm font-medium">{warning}</p>
-                                      </div>
-                                  </div>
-                              </div>
-                          )}
-
-                          <button
-                              onClick={handleDownload}
-                              disabled={isDownloading}
-                              className="w-full flex items-center justify-center gap-2 bg-brand-primary hover:bg-blue-800 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 disabled:bg-slate-400 disabled:cursor-not-allowed transform hover:scale-105"
-                          >
-                              {isDownloading ? (
-                                  <>
-                                      <Loader className="animate-spin" size={20} />
-                                      Baixando...
-                                  </>
-                              ) : (
-                                  <>
-                                      <Download size={20} />
-                                      Baixar como PNG
-                                  </>
-                              )}
-                          </button>
+          {/* Preview Column */}
+          <div className="lg:col-span-2">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg sticky top-8">
+                {error && (
+                    <div className="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-r-lg">
+                        <div className="flex">
+                            <div className="flex-shrink-0 pt-0.5">
+                                <AlertTriangle className="h-5 w-5 text-red-400" />
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm font-bold text-red-800">Erro na Geração</p>
+                                <p className="text-sm text-red-700 mt-1">{error}</p>
+                            </div>
                         </div>
-                        <p className="text-center text-sm text-slate-500 mt-2">
-                          Post referente ao sorteio de: {lotteryData.date}
-                          {lotteryData.isSampleData && <span className="font-bold text-amber-600"> (Resultado de Exemplo)</span>}
-                        </p>
                     </div>
-                ) : (
-                  <div className="text-center text-slate-500 flex flex-col items-center gap-4">
-                    <div className="w-24 h-24 bg-slate-200 rounded-full flex items-center justify-center">
-                        <ImageIcon size={48} className="text-slate-400"/>
-                    </div>
-                    <p className="max-w-xs whitespace-pre-line">{error || "Selecione uma loteria e um template, e clique em 'Gerar Post' para começar."}</p>
-                  </div>
                 )}
-              </div>
+                {warning && !error && (
+                    <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 rounded-r-lg">
+                       <div className="flex">
+                            <div className="flex-shrink-0 pt-0.5">
+                                <AlertTriangle className="h-5 w-5 text-yellow-400" />
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm font-bold text-yellow-800">Aviso</p>
+                                <p className="text-sm text-yellow-700 mt-1">{warning}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="w-full max-w-[550px] mx-auto">
+                    {lotteryData ? (
+                        <>
+                            <div className="aspect-[3/4] border border-slate-200 rounded-2xl overflow-hidden shadow-inner bg-slate-50">
+                                <CanvasPreview ref={canvasRef} template={selectedTemplate} data={lotteryData} luckyPhrase={luckyPhrase} />
+                            </div>
+                            <div className="mt-6 flex justify-center">
+                                <button
+                                    onClick={handleDownload}
+                                    disabled={isDownloading}
+                                    className="w-full max-w-md flex items-center justify-center gap-3 bg-brand-green text-white font-bold py-4 px-4 rounded-xl hover:bg-green-700 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 disabled:bg-slate-400 disabled:scale-100"
+                                >
+                                    {isDownloading ? (
+                                        <>
+                                            <Loader className="animate-spin" size={24} />
+                                            Baixando...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Download size={24} />
+                                            Baixar Imagem PNG
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="aspect-[3/4] border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center bg-slate-50/80 text-slate-500 p-8">
+                            <ImageIcon size={64} className="mb-4 opacity-50" />
+                            <h3 className="text-xl font-bold">Aguardando Geração</h3>
+                            <p className="text-base text-center max-w-xs mt-2">Escolha uma loteria e clique em "Gerar Post do Resultado" para visualizar a arte final aqui.</p>
+                        </div>
+                    )}
+                </div>
             </div>
           </div>
         </div>
