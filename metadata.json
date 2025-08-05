@@ -1,0 +1,6 @@
+{
+  "name": "[n8n] Gerador de Posts - Loteria Encruzilhada",
+  "description": "Crie posts para redes sociais com os resultados das Loterias da Caixa de forma rápida e fácil, usando templates customizáveis inspirados no Canva.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
