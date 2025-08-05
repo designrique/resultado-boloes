@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  # Serviço 1: A aplicação React (Frontend)
+  frontend:
+    build:
+      context: . # O contexto é a pasta raiz do projeto
+      dockerfile: Dockerfile.frontend # O arquivo de instruções
+    container_name: lottery-post-generator-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080" # Mapeia a porta 8080 do contêiner para a 8080 da VPS
+
+  # Serviço 2: O serviço de screenshot (Backend)
+  backend:
+    build:
+      context: ./backend # O contexto é a pasta 'backend'
+      dockerfile: Dockerfile.backend # O arquivo de instruções para ele
+    container_name: lottery-post-screenshot-service
+    restart: unless-stopped
+    ports:
+      - "3001:3001" # Mapeia a porta 3001 do contêiner para a 3001 da VPS
+    environment:
+      # Passa a sua API Key do Gemini para dentro do contêiner de forma segura
+      # Vamos configurar o valor no Portainer
+      - API_KEY=${API_KEY}
