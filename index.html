@@ -20,6 +20,13 @@
       }
     }
     </script>
+  <script>
+    // This script creates a placeholder for the API key.
+    // The entrypoint.sh script in the Docker container will replace
+    // "__GEMINI_API_KEY__" with the actual environment variable value at runtime.
+    // This makes the key available to the application without exposing it in the source code.
+    window.process = { env: { API_KEY: "__GEMINI_API_KEY__" } };
+  </script>
   <script type="importmap">
 {
   "imports": {
