@@ -1,0 +1,20 @@
+# Dockerfile.frontend
+
+# Use uma imagem base do Node.js para ter as ferramentas necessárias
+FROM node:18-alpine
+
+# Instale o 'serve', um servidor estático simples para aplicações de página única
+RUN npm install -g serve
+
+# Defina o diretório de trabalho dentro do contêiner
+WORKDIR /app
+
+# Copie TODOS os arquivos do seu projeto para o diretório /app no contêiner
+COPY . .
+
+# Exponha a porta que o 'serve' usará
+EXPOSE 8080
+
+# O comando para iniciar a aplicação quando o contêiner for executado
+# O '-s' é importante para que ele funcione como uma Single Page Application (SPA)
+CMD [ "serve", "-s", ".", "-l", "8080" ]
