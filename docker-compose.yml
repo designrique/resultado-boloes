@@ -1,1 +1,43 @@
-��슉
+version: '3.8'
+
+services:
+  # Nome do serviço da sua aplicação
+  gerador-posts-loteria:
+    # A imagem será construída a partir do Dockerfile na mesma pasta
+    build: .
+    # O nome da imagem que será criada. Mude se preferir.
+    image: n8n/gerador-posts-loteria:latest
+    restart: always
+    networks:
+      # Conecta o container à rede do Traefik.
+      # Verifique se o nome 'traefik_proxy' está correto para sua configuração.
+      - traefik_proxy # <--- NOTA: Verifique o nome da sua rede Traefik
+    environment:
+      # Passa a API_KEY para o container. O script entrypoint.sh vai usar isso.
+      # Você DEVE definir a variável 'API_KEY' nas "Environment variables"
+      # da sua Stack no Portainer.
+      - API_KEY=${API_KEY}
+    labels:
+      # --- Habilita o Traefik para este container ---
+      - "traefik.enable=true"
+
+      # --- Roteador HTTP ---
+      # Define como o Traefik vai acessar seu serviço.
+      # MUDE 'gerador.seusite.com.br' para o seu domínio real.
+      - "traefik.http.routers.gerador-loteria.rule=Host(`gerador.seusite.com.br`)" # <--- NOTA: MUDE PARA O SEU DOMÍNIO
+      - "traefik.http.routers.gerador-loteria.entrypoints=websecure"
+
+      # --- Configuração de TLS/HTTPS (SSL) ---
+      - "traefik.http.routers.gerador-loteria.tls=true"
+      # Aponta para o resolvedor de certificados do Let's Encrypt no Traefik.
+      # Verifique se 'myresolver' é o nome que você configurou.
+      - "traefik.http.routers.gerador-loteria.tls.certresolver=myresolver" # <--- NOTA: Verifique o nome do seu CertResolver
+
+      # --- Definição do Serviço ---
+      # Informa ao Traefik que seu app está rodando na porta 80 dentro do container.
+      - "traefik.http.services.gerador-loteria.loadbalancer.server.port=80"
+
+# Declaração da rede externa do Traefik
+networks:
+  traefik_proxy:
+    external: true
