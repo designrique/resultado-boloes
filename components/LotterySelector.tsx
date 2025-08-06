@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LotteryType } from '../types';
 
@@ -25,6 +26,7 @@ const LotterySelector: React.FC<LotterySelectorProps> = ({ selected, onSelect })
             <button
               key={option.type}
               onClick={() => onSelect(option.type)}
+              aria-label={`Selecionar loteria ${option.type}`}
               className={`px-4 py-3 font-bold text-white rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-opacity-50
                 ${option.color} 
                 ${selected === option.type ? 'ring-4 ring-blue-400' : 'ring-0'}`}

@@ -127,7 +127,7 @@ export default function App() {
           <div className="lg:col-span-2">
             <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg sticky top-8">
                 {error && (
-                    <div className="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-r-lg">
+                    <div role="alert" className="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-r-lg">
                         <div className="flex">
                             <div className="flex-shrink-0 pt-0.5">
                                 <AlertTriangle className="h-5 w-5 text-red-400" />
@@ -140,7 +140,7 @@ export default function App() {
                     </div>
                 )}
                 {warning && !error && (
-                    <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 rounded-r-lg">
+                    <div role="alert" className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700 rounded-r-lg">
                        <div className="flex">
                             <div className="flex-shrink-0 pt-0.5">
                                 <AlertTriangle className="h-5 w-5 text-yellow-400" />

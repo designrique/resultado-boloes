@@ -12,9 +12,19 @@ const TemplateSelector: React.FC<TemplateSelectorProps> = ({ templates, selected
   return (
     <div className="grid grid-cols-3 gap-4">
       {templates.map(template => (
-        <div key={template.id} className="text-center" onClick={() => onSelect(template)}>
+        <div key={template.id} className="text-center">
             <div
-                className={`w-full aspect-square rounded-lg cursor-pointer transition-all duration-200 overflow-hidden border-4
+                role="button"
+                tabIndex={0}
+                aria-label={`Selecionar template ${template.name}`}
+                onClick={() => onSelect(template)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onSelect(template);
+                    }
+                }}
+                className={`w-full aspect-square rounded-lg cursor-pointer transition-all duration-200 overflow-hidden border-4 focus:outline-none focus:ring-4 focus:ring-blue-300
                     ${selected.id === template.id ? 'border-brand-primary scale-105' : 'border-transparent hover:border-slate-300'}`}
             >
                 <template.thumbnail />
